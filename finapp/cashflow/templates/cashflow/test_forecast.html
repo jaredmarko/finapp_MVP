@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Forecast Results</title>
+  <!-- Load Chart.js from CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <h2>Forecast Results</h2>
+
+  <!-- Table of Forecast Data -->
+  <table>
+    <tr>
+      <th>Date</th>
+      <th>Predicted Amount</th>
+    </tr>
+    {% for row in forecast_data %}
+    <tr>
+      <td>{{ row.ds }}</td>
+      <td>{{ row.yhat|floatformat:2 }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+
+  <!-- The Canvas for Chart -->
+  <canvas id="forecastChart" width="600" height="400"></canvas>
+
+  {% autoescape off %}
+  <script>
+    /*
+      forecast_data_json should already be valid JSON from your view:
+        forecast_data_json = json.dumps(forecast_data, default=str)
+
+      By using {{ forecast_data_json|safe }}, we embed an actual JS array/object.
+      Example output in final HTML:
+         var forecastData = [{"ds":"2023-01-29 00:00:00","yhat":856.91}, ... ];
+    */
+    const raw = "{{ forecast_data_json|escapejs }}";
+    const forecastData = JSON.parse(raw);
+    console.log(forecastData);
+
+    // Extract labels (ds) and values (yhat) for Chart.js
+    const labels = forecastData.map(item => item.ds);
+    const values = forecastData.map(item => item.yhat);
+
+    // Render the chart
+    const ctx = document.getElementById('forecastChart').getContext('2d');
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: 'Forecast',
+          data: values,
+          borderColor: 'rgba(75, 192, 192, 1)',
+          fill: false
+        }]
+      }
+    });
+  </script>
+  {% endautoescape %}
+</body>
+</html>
+
+

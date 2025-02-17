@@ -1,0 +1,36 @@
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<h2>Forecast Results</h2>
+<table>
+    <tr>
+      <th>Date</th>
+      <th>Predicted Amount</th>
+    </tr>
+    {% for row in forecast_data %}
+    <tr>
+      <td>{{ row.ds }}</td>
+      <td>{{ row.yhat|floatformat:2 }}</td>
+    </tr>
+    {% endfor %}
+</table>
+
+<canvas id="forecastChart" width="600" height="400"></canvas>
+<script>
+  const forecastData = JSON.parse('{{ forecast_data|safe|escapejs }}');
+  const labels = forecastData.map(item => item.ds);
+  const values = forecastData.map(item => item.yhat);
+
+  const ctx = document.getElementById('forecastChart').getContext('2d');
+  new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: 'Forecast',
+        data: values,
+        borderColor: 'rgba(75, 192, 192, 1)',
+        fill: false
+      }]
+    }
+  });
+</script>
